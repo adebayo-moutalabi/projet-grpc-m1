@@ -1,0 +1,15 @@
+syntax = "proto3";
+package datenotif;
+option java_package = "fr.istic.grpc.datenotif";
+
+service DateNotif {
+    rpc SubscribeDate(DateRequest) returns (stream DateMessage) {}
+}
+
+message DateRequest {
+    // Le message est vide
+}
+
+message DateMessage {
+    string date = 1;
+}

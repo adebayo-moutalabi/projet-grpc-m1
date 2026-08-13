@@ -1,0 +1,4 @@
+/home/tadpole/Documents/M1CR/PROJET_gRPC/4types/04_bidiGRPC/java-server/src/main/java/fr/istic/grpc/sommestream/server/SommeStreamServer.java
+/home/tadpole/Documents/M1CR/PROJET_gRPC/4types/04_bidiGRPC/java-server/src/main/java/fr/istic/grpc/sommestream/server/SommeStreamServiceImpl.java
+/home/tadpole/Documents/M1CR/PROJET_gRPC/4types/04_bidiGRPC/java-server/target/generated-sources/protobuf/grpc-java/fr/istic/grpc/sommestream/SommeStreamServiceGrpc.java
+/home/tadpole/Documents/M1CR/PROJET_gRPC/4types/04_bidiGRPC/java-server/target/generated-sources/protobuf/java/fr/istic/grpc/sommestream/Sommestream.java

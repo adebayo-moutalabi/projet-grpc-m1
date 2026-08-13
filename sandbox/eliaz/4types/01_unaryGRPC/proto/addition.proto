@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package addition;
+
+option java_multiple_files = true;      // les classes java générés seront séparés en plusieurs fichiers (+ lisible)
+option java_package = "com.example.grpc.addition";    // def du package java
+option java_outer_classname = "AdditionProto";
+
+service AdditionService {
+  rpc Add (AddRequest) returns (AddResponse);
+}
+
+message AddRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message AddResponse {
+  int32 result = 1;
+}

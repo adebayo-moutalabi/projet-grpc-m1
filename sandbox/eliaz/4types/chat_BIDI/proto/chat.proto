@@ -1,0 +1,10 @@
+syntax = "proto3";
+package chat;
+option java_package = "fr.istic.grpc.chat";
+service ChatService {
+  rpc joinChat(stream ChatMessage) returns (stream ChatMessage) {}
+}
+message ChatMessage {
+  string user = 1;
+  string message = 2;
+}

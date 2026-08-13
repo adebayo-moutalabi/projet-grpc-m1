@@ -1,0 +1,7 @@
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/src/main/java/com/example/grpc/client/ClientApp.java
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/target/generated-sources/protobuf/grpc-java/com/example/grpc/addition/AdditionServiceGrpc.java
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/target/generated-sources/protobuf/java/com/example/grpc/addition/AddRequest.java
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/target/generated-sources/protobuf/java/com/example/grpc/addition/AddRequestOrBuilder.java
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/target/generated-sources/protobuf/java/com/example/grpc/addition/AddResponse.java
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/target/generated-sources/protobuf/java/com/example/grpc/addition/AddResponseOrBuilder.java
+/home/tadpole/Documents/M1CR/projet-grpc-m1/sandbox/eliaz/4types/01_unaryGRPC/java-client/target/generated-sources/protobuf/java/com/example/grpc/addition/AdditionProto.java

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package streamcalc;
+option java_package = "fr.istic.grpc.streamcalc";
+
+service StreamCalcService {
+    rpc Sum(stream NumberRequest) returns (SumReply) {}
+}
+
+message NumberRequest {
+    int32 number = 1;
+}
+
+message SumReply {
+    int32 sum = 1;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package sommestream;
+option java_package = "fr.istic.grpc.sommestream";
+
+service SommeStreamService {
+    rpc SommeStream(stream IntMessage) returns (stream SommeMessage) {}
+}
+message IntMessage {
+    int32 value = 1;
+}
+message SommeMessage {
+    int32 sum = 1;
+}
