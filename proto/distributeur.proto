@@ -1,0 +1,16 @@
+syntax = "proto3";
+package distributeur;
+
+message Piece    { int32 centimes = 1; }
+message Boisson  { string nom = 1; int32 prix = 2; }
+message Article  { string nom = 1; int32 quantite = 2; }
+message Bilan    { int32 total_ajoute = 1; }
+message Commande { string texte = 1; }
+message Reponse  { string texte = 1; }
+
+service Distributeur {
+  rpc Acheter      (Piece)            returns (Boisson);
+  rpc VoirStock    (Piece)            returns (stream Boisson);
+  rpc Recharger    (stream Article)   returns (Bilan);
+  rpc Maintenance  (stream Commande)  returns (stream Reponse);
+}

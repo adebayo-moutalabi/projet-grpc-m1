@@ -1,0 +1,24 @@
+# Code gRPC généré (à ne pas versionner)
+*_pb2.py
+*_pb2_grpc.py
+*_pb2.pyi
+
+# Environnements virtuels Python
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & Éditeurs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
