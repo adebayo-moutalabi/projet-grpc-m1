@@ -3,6 +3,12 @@
 *_pb2_grpc.py
 *_pb2.pyi
 
+# Code gRPC généré côté Go (régénéré par gen.sh)
+**/go/colispb/
+
+# Binaires Go compilés
+colisgo
+
 # Environnements virtuels Python
 .venv/
 venv/

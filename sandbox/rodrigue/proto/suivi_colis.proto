@@ -1,0 +1,96 @@
+syntax = "proto3";
+package colis;
+
+// Requis par le generateur Go (sans effet sur la generation Python).
+option go_package = "./colispb";
+
+import "google/protobuf/timestamp.proto";
+
+enum Statut {
+    STATUT_INCONNU = 0; // La valeur 0 est obligatoire en proto3
+    CREE = 1;
+    EN_TRANSIT = 2;
+    LIVRE = 3;
+}
+
+enum Role {
+    ROLE_INCONNU = 0;
+    CLIENT = 1;
+    LIVREUR = 2;
+}
+
+// Méssage partagé
+message Position {
+    double latitude = 1;
+    double longitude = 2;   
+}
+
+// Pattern Unary
+message CreerColisRequest {
+    string destinataire = 1;
+    string adresse = 2;
+    Position depot = 3;
+    Position destination = 4;
+}
+
+message CreerColisResponse {
+    string colis_id = 1;
+    Statut statut = 2;
+    google.protobuf.Timestamp cree_le = 3;
+}
+
+// Pattern Server Streaming
+
+message SuivreColisRequest {
+  string colis_id = 1;
+}
+
+message PositionUpdate {
+  string                    colis_id        = 1;
+  Position                  position        = 2;
+  Statut                    statut          = 3;
+  int32                     progression_pct = 4;
+  google.protobuf.Timestamp horodatage      = 5;
+}
+
+// Pattern Client Streaming
+
+// colis_id et nom_fichier ne comptent que sur le 1er chunk
+// de chaque photo ; fin_de_photo marque le dernier.
+message PhotoChunk {
+  string colis_id     = 1;
+  string nom_fichier  = 2;
+  bytes  contenu      = 3;
+  bool   fin_de_photo = 4;
+}
+
+message PreuveResponse {
+  string colis_id      = 1;
+  int32  photos_recues = 2;
+  int64  octets_recus  = 3;
+  Statut statut        = 4;
+}
+
+// Pattern Bi-directional Streaming
+
+message ChatMessage {
+  string                    colis_id   = 1;
+  Role                      expediteur = 2;
+  string                    auteur     = 3;
+  string                    texte      = 4;
+  google.protobuf.Timestamp horodatage = 5;  // pose par le serveur
+}
+
+service SuiviColis {
+    // Pattern Unary
+    rpc CreerColis(CreerColisRequest) returns (CreerColisResponse);
+
+    // Pattern Server Streaming
+    rpc SuivreColis(SuivreColisRequest) returns (stream PositionUpdate);
+
+    // Pattern Client Streaming
+    rpc EnvoyerPreuve(stream PhotoChunk) returns (PreuveResponse);
+
+    // Pattern Bi-directional Streaming
+    rpc Discuter(stream ChatMessage) returns (stream ChatMessage);
+}
