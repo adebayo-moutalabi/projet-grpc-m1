@@ -87,11 +87,31 @@ public class DeliveryServiceImpl extends DeliveryServiceGrpc.DeliveryServiceImpl
         return new StreamObserver<Photo>() {
             private final List<String> filenames = new ArrayList<>();
             private String orderId = null;
+            private boolean orderValid = true ;         //s'assurer que le livreur entre un order_id qui existe
 
+            /**         version onNext sans vérif de validité de l'order_id
             @Override
             public void onNext(Photo photo) {           //à chaque envoi de photo par le livreur
                 orderId = photo.getOrderId();           //récup l'id
                 filenames.add(photo.getFilename());     //ajouter le nom de la photo à la liste temp
+                System.out.println("Photo reçue pour " + orderId + " : " + photo.getFilename());           
+            }
+            */
+            @Override
+            public void onNext(Photo photo){
+                if(orderId == null){            //si première photo
+                    orderId = photo.getOrderId();           //alors on update l'order_id
+                    if(!orders.containsKey(orderId)){           //et si il est pas dans la liste des commandes
+                        orderValid = false;         //alors commande inconnue -> erreur
+                        responseObserver.onError(Status.NOT_FOUND.withDescription("Numéro de commande invalide : " + orderId + " n'est pas un identifiant de commande connu.").asRuntimeException());
+                        return;
+                    }
+                }
+                if(!orderValid){
+                    return ;    //on ingore tout ce qui suit si la commande était invalide
+                }
+
+                filenames.add(photo.getFilename());
                 System.out.println("Photo reçue pour " + orderId + " : " + photo.getFilename());           
             }
 
@@ -102,6 +122,11 @@ public class DeliveryServiceImpl extends DeliveryServiceGrpc.DeliveryServiceImpl
 
             @Override
             public void onCompleted() {                 //quand le livreur a fini d'envoyer des photos
+
+                if(!orderValid){
+                    return ;            //si l'order_id était invalide alors onError a déjà été appelé, il ne faut pas exec onCompleted() (interdit dans les règles gRPC!)
+                }
+
                 if (orderId != null) {
                     OrderState state = orders.get(orderId);     // récupérer l'état stocké de la commande
                     if (state != null) {                //important sinon y'a quelques crash 
@@ -124,28 +149,32 @@ public class DeliveryServiceImpl extends DeliveryServiceGrpc.DeliveryServiceImpl
     public StreamObserver<ChatMessage> supportChat(StreamObserver<ChatMessage> responseObserver) {
         return new StreamObserver<ChatMessage>() {
             private String orderId = null;
+            private String sender = null;       //nom du participant au chat
 
             @Override
             public void onNext(ChatMessage message) {
                 orderId = message.getOrderId();         //récupération de l'order_id dans le premier message reçu
+                sender = message.getSender();       //et récup du sender
+
                 OrderState state = orders.get(orderId);
-                if (state == null) {                    //verif que l'order existe
+                if (state == null) {                    //si l'order_id est invalide et qu'il est relié à aucune comande
                     System.out.println("Message reçu pour une commande inconnue : " + orderId);
+                    responseObserver.onError(Status.NOT_FOUND.withDescription("Numéro de commande inconnu :" + orderId + " n'est pas un ID de commande connu.").asRuntimeException());
                     return;
                 }
 
                 // Enregistrement de ce participant au premier message reçu
                 if (!state.getChatParticipants().contains(responseObserver)) {
                     state.getChatParticipants().add(responseObserver);
-                    System.out.println(message.getSender() + " a rejoint le chat de la commande " + orderId);
+                    System.out.println(sender + " a rejoint le chat de la commande " + orderId);
                 }
-                /**
-                 * IMPORTANT : comme on enregistre le participant au premier msg reçu et pas avant (on connait pas encore l'order_id), 
-                 * on va systématiquement perdre le premier message envoyé. C'est pour ça que je demande aux deux participants d'envoyer un message dummy qui sera sacrifié pour l'init.
-                 */
+                
+                if(message.getContent().isEmpty()){     // permet de bypass le message vide d'init du sender et livreur
+                    return;
+                }
 
                 //affichage du msg
-                System.out.println("[" + orderId + "] " + message.getSender() + ": " + message.getContent());
+                System.out.println("[" + orderId + "] " + sender + ": " + message.getContent());
 
                 //redif à tous ceux qui écoutent sur cet order_id
                 for (StreamObserver<ChatMessage> participant : state.getChatParticipants()) {
@@ -169,6 +198,11 @@ public class DeliveryServiceImpl extends DeliveryServiceGrpc.DeliveryServiceImpl
             @Override
             // quand le stream client ferme normalement (ligne vide)
             public void onCompleted() {
+                if(sender != null){
+                    System.out.println(sender + " a quitté le chat de la commande " + orderId);
+                } else {
+                    System.out.println("Un participant a quitté le chat de la commande " + orderId); //est-ce que c'est possible d'exec ça ?
+                }
                 removeParticipant();
                 responseObserver.onCompleted();
             }
@@ -178,6 +212,7 @@ public class DeliveryServiceImpl extends DeliveryServiceGrpc.DeliveryServiceImpl
                 if (orderId != null) {
                     OrderState state = orders.get(orderId);
                     if (state != null) {
+                        
                         state.getChatParticipants().remove(responseObserver);
                     }
                 }

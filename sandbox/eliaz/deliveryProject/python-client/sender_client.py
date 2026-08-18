@@ -35,8 +35,11 @@ def track_delivery(stub, order_id):
 # CHAT AVEC LE LIVREUR
 def chat(stub, order_id):
     def generate_messages():        #stream Client -> Serveur
+        
+        yield delivery_pb2.ChatMessage(order_id=order_id, sender="client", content="")      #msg vide pour l'init
+        
         print("Chat avec le livreur (ligne vide pour quitter) :")
-        print("ATTENTION : POUR BIEN INITIALISER LE CHAT, VEUILLEZ ENTRER \"CONFIRMER\" EN PREMIER MESSAGE.\n")
+        #print("ATTENTION : POUR BIEN INITIALISER LE CHAT, VEUILLEZ ENTRER \"CONFIRMER\" EN PREMIER MESSAGE.\n")
         while True:
             line = input("> ")
             if line == "":      # le client veut quitter le chat
@@ -45,7 +48,7 @@ def chat(stub, order_id):
 
     responses = stub.SupportChat(generate_messages())       #génération du stream de message
     for message in responses:
-        print(f"[{message.sender}] {message.content}")      #affichage des msg
+        print(f"[{message.sender}] {message.content}\n> ")      #affichage des msg
 
 
 def main():
