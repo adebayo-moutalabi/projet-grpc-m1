@@ -52,35 +52,29 @@ def main():
     with grpc.insecure_channel("localhost:8080") as channel:
         stub = delivery_pb2_grpc.DeliveryServiceStub(channel)
 
+        #liaison du livreur et de la commande
+        order_id = input("Numéro de la commande à livrer : ")           #TODO pas encore de vérif que l'order_id est le bon pour le moment 
 
         #boucle du livreur
         while True:
-            #liaison du livreur et de la commande
-            order_id = input("Numéro de la commande à livrer : (\"fin\" pour quitter)\n>")           #TODO pas encore de vérif que l'order_id est le bon pour le moment 
-            if order_id == "fin":
-                break
-            
-            
-            while True:
-            
-                print("\n")
-                print("1. Envoyer les photos de preuve de livraison")
-                print("2. Ouvrir le chat avec le client")
-                print("3. Quitter")
-                choice = input("Choix : ")
+            print("\n")
+            print("1. Envoyer les photos de preuve de livraison")
+            print("2. Ouvrir le chat avec le client")
+            print("3. Quitter")
+            choice = input("Choix : ")
 
-                #envoi photos
-                if choice == "1":
-                    upload_proof(stub, order_id)
-                #ouvrir chat
-                elif choice == "2":
-                    chat(stub, order_id)
-                #fin
-                elif choice == "3":
-                    break
-                #erreur ou pas reconnu
-                else:
-                    print("Choix invalide.")
+            #envoi photos
+            if choice == "1":
+                upload_proof(stub, order_id)
+            #ouvrir chat
+            elif choice == "2":
+                chat(stub, order_id)
+            #fin
+            elif choice == "3":
+                break
+            #erreur ou pas reconnu
+            else:
+                print("Choix invalide.")
 
 
 if __name__ == "__main__":

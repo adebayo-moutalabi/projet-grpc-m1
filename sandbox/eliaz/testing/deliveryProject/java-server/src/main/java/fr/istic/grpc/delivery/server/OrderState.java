@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class OrderState {
     private final String orderId;       //id de la commande, clé primaire
     private final List<String> photos = new CopyOnWriteArrayList<>();       //liste des photos envoyées par le livreur
-    private final List<StreamObserver<ChatMessage>> chatParticipants = new CopyOnWriteArrayList<>();    //stocker les deux (ou +) StreamObserver (client/livreur) quand ils se connectent
+    private final List<StreamObserver<ChatMessage>> chatParticipants = new CopyOnWriteArrayList<>();    //stocker les deux StreamObserver (client/livreur) quand ils se connectent
     // j'utilise un CopyOnWriteArrayList comme vu en IPD pour être thread safe même si c'est lourd en performance. Ca reste OK parce qu'en théorie il y a au max 2 personnes à la fois sur le chat.
 
     public OrderState(String orderId) {
