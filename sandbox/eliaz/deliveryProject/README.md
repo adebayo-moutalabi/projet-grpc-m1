@@ -1,11 +1,11 @@
-# DeliveryTracking — Démonstration des 4 types de RPC gRPC
+# DeliveryTracking - Démonstration des 4 types de RPC gRPC
 
 **(clic droit sur le fichier -> Open Preview)**
 
 Ceci est le manuel utilisateur du prototype d'application de démonstration illustrant les **4 types de communication gRPC** (Unary, Server Streaming, Client Streaming, Bidirectional Streaming) à travers divers outils de suivi de livraison de colis.
 
 - **1 Serveur** : Java (Maven)
-- **2 Clients** : Python (client Sender + client Livreur)
+- **2 Clients** : Python (client Sender/Destinataire + client Livreur)
 
 ---
 
@@ -30,9 +30,9 @@ L'application simule le parcours d'un colis, du dépôt de la commande jusqu'à 
 | Étape métier | Type de RPC | Méthode |
 |---|---|---|
 | Le Sender crée une commande | **Unary** | `CreateOrder` |
-| Le Sender suit la position du  livreur en temps réel | **Server Streaming** | `TrackDelivery` |
+| Le Destinataire suit la position du  livreur en temps réel | **Server Streaming** | `TrackDelivery` |
 | Le Livreur envoie au serveur les photos de preuve de livraison | **Client Streaming** | `UploadProof` |
-| Le Sender et le Livreur discutent en cas de problème | **Bidirectional Streaming** | `SupportChat` |
+| Le Destinataire et le Livreur discutent en cas de problème | **Bidirectional Streaming** | `SupportChat` |
 
 Toutes ces méthodes sont regroupées dans un unique service gRPC : `DeliveryService`.
 
@@ -48,7 +48,7 @@ Le fil rouge de l'application est l'**`order_id`.** Il est généré côté serv
 ## 3. Le fichier `.proto`
 
 Le fichier **`proto/delivery.proto`**
-est le **contrat partagé** entre le serveur Java et les clients Python : chacun génère son propre code à partir de ce même fichier, garantissant que les deux côtés parlent le même langage quand bien même celui de leur code respectif est différent.
+est le contrat partagé entre le serveur Java et les clients Python : chacun génère son propre code à partir de ce même fichier, ce qui garantit que les deux côtés parlent le même langage quand bien même celui de leur code respectif est différent.
 
 ---
 
@@ -61,7 +61,7 @@ est le **contrat partagé** entre le serveur Java et les clients Python : chacun
 | Python | 3.9+ | `python3 --version` |
 | pip | à jour | `pip --version` |
 
-Pour ce prototype, aucune base de données ni service externe n'est nécessaire : l'état de l'application est conservé **en mémoire** côté serveur, le temps de son exécution.
+Pour ce prototype, aucune base de données ni service externe n'est nécessaire : l'état de l'application est conservé **en mémoire** côté serveur dans la classe `OrderState` , le temps de son exécution.
 
 ---
 
@@ -140,7 +140,7 @@ Serveur DeliveryService démarré sur le port 8080
 
 Il n'y a aucune autre action requise du côté serveur, il reste cependant un bon point d'observation de l'exécution.
 
-### Terminal 2 — Client Sender
+### Terminal 2 — Client Sender/Destinataire
 
 ```bash
 cd python-clients
@@ -170,11 +170,11 @@ Description de l'objet : Table
 Commande créée : a1b2 (confirmée : True)
 ```
 
-**Notez l'`order_id` affiché** (ici `a1b2`) : il devra être communiqué manuellement au livreur pour la suite (dans une vraie application, il serait transmis par SMS/e-mail. Ici on le tape simplement dans le Terminal 3 du Livreur).
+**Prenez note de l'`order_id` affiché** (ici `a1b2`) : il devra être communiqué manuellement au livreur pour la suite (dans une vraie application, il serait transmis par SMS/e-mail. Ici on le tape simplement dans le Terminal 3 du Livreur).
 
 ### Étape 2 — Suivre le livreur (Server Streaming)
 
-Toujours dans le Terminal 2 **(SENDER)**, choisissez l'option **1** du menu :
+Toujours dans le Terminal 2, choisissez l'option **1** du menu :
 ```
 1. Suivre la livraison
 2. Ouvrir le chat avec le livreur
@@ -249,7 +249,7 @@ De plus, tous les messages envoyés ainsi que les connexions et déconnexions au
 1. Le client envoie **plusieurs** messages `Photo` successifs (un par photo), sans attendre de réponse intermédiaire.
 2. Le serveur accumule les noms de fichiers dans une liste locale à l'appel, au fil des `onNext()`.
 3. Quand le client termine son flux (ligne vide → `onCompleted()` déclenché côté serveur), le serveur enregistre les photos dans l'`OrderState` correspondant et répond **une seule fois** avec `UploadAck`.
-4. Si l'`order_id` fourni par le livreur au préalable n'existe pas, le serveur répond par une erreur `NOT_FOUND` dès la première photo reçue, sans attendre la fin du flux.
+4. Si l'`order_id` fourni par le livreur au préalable n'existe pas, le serveur répond par une erreur `NOT_FOUND` dès la première photo reçue, sans attendre la fin du flux. Il est possible de vérifier la validité de l'`order_id` entré par le livreur instantanément, mais cela demanderait un nouvel Unary et casserait la logique du Client Streaming. Pour autant, c'est évidemment la chose à faire en production.
 
 ### 8.4. `SupportChat` — Bidirectional Streaming
 
@@ -282,7 +282,7 @@ C'est le RPC le plus complexe, car client et serveur échangent des messages de 
 
 ## 10. Limitations actuelles
 
-Ces simplifications sont assumées pour garder l'exemple concis :
+Ces simplifications sont assumées pour garder l'exemple le plus simple possible :
 
 - **Pas de persistance** : toutes les données (`orders`) vivent en mémoire et sont perdues à l'arrêt du serveur.
 - **Pas de nettoyage automatique** : une commande créée reste indéfiniment dans la `Map`, même après livraison complète — aucun mécanisme de nettoyage n'est implémenté.
