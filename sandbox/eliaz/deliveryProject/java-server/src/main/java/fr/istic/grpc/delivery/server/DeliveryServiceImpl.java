@@ -134,7 +134,7 @@ public class DeliveryServiceImpl extends DeliveryServiceGrpc.DeliveryServiceImpl
                     }
                 }
                 System.out.println(filenames.size() + " photo(s) reçue(s) au total pour " + orderId);
-
+                System.out.println("Envoi de l'ACK au livreur.");
                 UploadAck ack = UploadAck.newBuilder()
                         .setPhotosReceived(filenames.size())
                         .build();               //construction d'un accusé de réception des photos
